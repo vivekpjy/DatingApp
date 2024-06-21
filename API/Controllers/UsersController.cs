@@ -42,7 +42,7 @@ public class UsersController : BaseApiController
     }
 
     [HttpPut]
-    public async Task<ActionResult> UpdateUser(MEmberUpdateDto memberUpdateDto)
+    public async Task<ActionResult> UpdateUser(MemberUpdateDto memberUpdateDto)
     {
         var user = await _userRepository.GetUserByUsernameAsync(User.GetUserName());
         if (user == null) return NotFound();
