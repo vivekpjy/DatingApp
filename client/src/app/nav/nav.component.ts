@@ -17,7 +17,7 @@ export class NavComponent implements OnInit {
   ){}
 
   ngOnInit(): void {
-    console.log(this.service.currentUser$)
+    // console.log(this.service.currentUser$)
   }
 
  
