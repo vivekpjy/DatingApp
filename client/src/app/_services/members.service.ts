@@ -104,6 +104,15 @@ export class MembersService {
     return this.http.delete(this.baseUrl + 'users/delete-photo/' + photoId);
   }
 
+  addLike(username: string) {
+    return this.http.post(this.baseUrl + 'likes/' + username, {});
+  }
+  getLikes(predicate: string, pageNumber: number, pageSize: number) {
+    let param = this.getPaginationHeaders(pageNumber, pageSize);
+    param = param.append('predicate', predicate);
+    return this.getPaginatedResult<Member[]>(this.baseUrl + 'likes', param);
+  }
+
   // used JWT interceptor instead of getHttpOptions() method
   // getHttpOptions(){
   //   const userString = localStorage.getItem('user');
