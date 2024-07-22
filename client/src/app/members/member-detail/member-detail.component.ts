@@ -9,6 +9,10 @@ import { MembersService } from 'src/app/_services/members.service';
 import { MemberMessagesComponent } from '../member-messages/member-messages.component';
 import { MessagesService } from 'src/app/_services/messages.service';
 import { Message } from 'src/app/_models/message';
+import { PresenceService } from 'src/app/_services/presence.service';
+import { take } from 'rxjs';
+import { AccountService } from 'src/app/_services/account.service';
+import { User } from 'src/app/_models/user';
 
 @Component({
   selector: 'app-member-detail',
@@ -29,12 +33,21 @@ export class MemberDetailComponent implements OnInit {
   image: GalleryItem[] = [];
   activeTab?: TabDirective;
   messages:Message[]=[];
+  user?: User;
 
   constructor(
+    private accuntService: AccountService,
     private memberService: MembersService,
     private route: ActivatedRoute,
-    private messageService:MessagesService
-  ) {}
+    private messageService:MessagesService,
+    public presenceService: PresenceService
+  ) {
+    this.accuntService.currentUser$.pipe(take(1)).subscribe({
+      next: (user) => {
+        if (user) this.user = user;
+      },
+    });
+  }
 
   ngOnInit(): void {
     // this.loadMember();
