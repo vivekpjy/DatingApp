@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { GalleryItem, GalleryModule, ImageItem } from 'ng-gallery';
 import { TabDirective, TabsModule, TabsetComponent } from 'ngx-bootstrap/tabs';
@@ -27,19 +27,18 @@ import { User } from 'src/app/_models/user';
     MemberMessagesComponent,
   ],
 })
-export class MemberDetailComponent implements OnInit {
-  @ViewChild('memberTabs', {static:true}) memberTabs?: TabsetComponent;
-  member:Member = {} as Member;
+export class MemberDetailComponent implements OnInit, OnDestroy {
+  @ViewChild('memberTabs', { static: true }) memberTabs?: TabsetComponent;
+  member: Member = {} as Member;
   image: GalleryItem[] = [];
   activeTab?: TabDirective;
-  messages:Message[]=[];
+  messages: Message[] = [];
   user?: User;
 
   constructor(
     private accuntService: AccountService,
-    private memberService: MembersService,
     private route: ActivatedRoute,
-    private messageService:MessagesService,
+    private messageService: MessagesService,
     public presenceService: PresenceService
   ) {
     this.accuntService.currentUser$.pipe(take(1)).subscribe({
@@ -52,34 +51,41 @@ export class MemberDetailComponent implements OnInit {
   ngOnInit(): void {
     // this.loadMember();
     this.route.data.subscribe({
-      next:data=>this.member =data['member']
-    })
+      next: (data) => (this.member = data['member']),
+    });
 
     this.route.queryParams.subscribe({
-      next:params=>{
-        params['tab'] && this.selectTab(params['tab'])
-      }
-    })
+      next: (params) => {
+        params['tab'] && this.selectTab(params['tab']);
+      },
+    });
 
     this.getImages();
   }
 
-  selectTab(heading:string){
-    if(this.memberTabs){
-      this.memberTabs.tabs.find(x=>x.heading === heading)!.active = true;
+  ngOnDestroy(): void {
+    this.messageService.stopHubConnection();
+  }
+
+  selectTab(heading: string) {
+    if (this.memberTabs) {
+      this.memberTabs.tabs.find((x) => x.heading === heading)!.active = true;
     }
   }
 
-  onTabActivated(data:TabDirective){
-    this.activeTab = data
-    if(this.activeTab.heading === 'Messages'){
-        this.loadMessages()
+  onTabActivated(data: TabDirective) {
+    this.activeTab = data;
+    if (this.activeTab.heading === 'Messages' && this.user) {
+      // this.loadMessages()
+      this.messageService.createHubConnection(this.user, this.member.userName);
+    } else {
+      this.messageService.stopHubConnection();
     }
   }
   loadMessages() {
     if (this.member) {
       this.messageService.getMessageThread(this.member.userName).subscribe({
-        next: response => this.messages = response,
+        next: (response) => (this.messages = response),
       });
     }
   }
