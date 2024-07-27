@@ -108,8 +108,11 @@ namespace API.SignalR
         private async Task RemoveFromMessageGroup()
         {
             var connection = await _messageRepository.GetConnection(Context.ConnectionId);
+             if (connection != null)
+            {
             _messageRepository.RemoveConnection(connection);
             await _messageRepository.SaveAllAsync();
+            }
         }
     }
 }
